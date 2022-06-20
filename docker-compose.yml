@@ -1,21 +1,37 @@
 version: '3'
 
-services:
-###> doctrine/doctrine-bundle ###
-  database:
-    image: postgres:${POSTGRES_VERSION:-13}-alpine
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-app}
-      # You should definitely change the password in production
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ChangeMe}
-      POSTGRES_USER: ${POSTGRES_USER:-symfony}
+services: 
+  nginx:
+    image: nginx:latest
     volumes:
-      - db-data:/var/lib/postgresql/data:rw
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/db/data:/var/lib/postgresql/data:rw
-###< doctrine/doctrine-bundle ###
+      - ./:/var/www/
+      - ./_docker/nginx/conf.d/:/etc/nginx/conf.d/
+    ports:
+      - 8877:80
+    depends_on:
+      - app
+    container_name: form_symfony_nginx
+    
+  app:
+   build:
+    context: .
+    dockerfile: _docker/app/Dockerfile
+   volumes:
+     - ./:/var/www/
+   user: 1000:1000
+   depends_on: 
+     - db
+   container_name: form_symfony_app
 
-volumes:
-###> doctrine/doctrine-bundle ###
-  db-data:
-###< doctrine/doctrine-bundle ###
+  db:
+   image: mysql:8.0-oracle
+   restart: always
+   volumes:
+     - ./tmp/db:/var/lib/mysql
+   environment: 
+    MYSQL_DATABASE: form_symfony 
+    MYSQL_ROOT_PASSWORD: root
+   ports:
+     - 8103:3306
+   command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci 
+   container_name: project_db
