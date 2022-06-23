@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Blog;
-use App\Repository\BlogRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -22,15 +21,24 @@ class BlogController extends AbstractController
     {
         $repository = $doctrine->getRepository(Blog::class);
         $posts = $repository->findAll();
-        foreach ($posts as $post) {
-            return new Response('Check out this great data: ' . $post->getId());
-        }
+        
+        return $this->render('index.html.twig', [
+            'posts' => $posts
+        ]);
     }
 
     /**
-     * @Route("/create", name="create")
+     * @Route("/create", name="create", methods={"GET","HEAD"})
      */
-    public function create(ManagerRegistry $doctrine, ValidatorInterface $validator): Response
+    public function create(): Response
+    {
+        return $this->render('create.html.twig');
+    }
+
+    /**
+     * @Route("/create", name="store", methods={"POST"})
+     */
+    public function store(ManagerRegistry $doctrine, ValidatorInterface $validator): Response
     {
         $entityManager = $doctrine->getManager();
         $post = new Blog();
@@ -54,17 +62,28 @@ class BlogController extends AbstractController
      */
     public function show(Blog $post): Response
     {
-        return new Response('Check out this great data: ' . $post->getTitle());
+        return $this->render('detail.html.twig', [
+            'post' => $post
+        ]);
     }
 
     /**
-     * @Route("/edit/{slug}", name="update")
+     * @Route("/edit/{slug}", name="update", methods={"GET","HEAD"})
      */
-    public function update(ManagerRegistry $doctrine, Blog $post): Response
+    public function update(Blog $post): Response
+    {
+        return $this->render('update.html.twig', [
+            'post' => $post
+        ]);
+    }
+
+    /**
+     * @Route("/edit/{slug}", name="edit")
+     */
+    public function edit(ManagerRegistry $doctrine, Blog $post): Response
     {
         $entityManager = $doctrine->getManager();
         $data = $entityManager->getRepository(Blog::class)->find($post);
-
         $data->setTitle('New data title!');
         $entityManager->flush();
         return $this->redirectToRoute('blog_show', [
