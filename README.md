@@ -16,6 +16,8 @@
 
 - в данную папку установите репозиторий командой git clone https://github.com/uuviuu/form_symfony 
 
+- настройте связь проекта с бд в файле .env
+
 Для установки данного проекта введите команды:
 
 - docker-compose up -d - установить зависимости из файла docker-compose.yml, переименуйте поля container_name, если они уже используются, если возникнет ошибка занятости порта, то измените порты nginx и db, оставив значения после двоеточия
@@ -27,6 +29,10 @@
 - composer update - установка библиотек PHP
 
 - composer dump-autoload - включение классов, которые используются в проекте
+
+- php bin/console make:migration - собрать миграции
+
+- php bin/console doctrine:migrations:migrate - провести миграции
 
 Контакты: 
  - [почта](mailto:my.test.laravel.message@gmail.com) 
