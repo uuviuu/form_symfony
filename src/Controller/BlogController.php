@@ -18,7 +18,7 @@ class BlogController extends AbstractController
 {
     /**
      * Выводит все посты из таблицы Blog
-     * @Route("", name="all", methods={"GET"})
+     * @Route("", name="учше", methods={"GET"})
      */
     public function all(ManagerRegistry $doctrine): Response
     {
@@ -85,8 +85,12 @@ class BlogController extends AbstractController
     /**
      * @Route("/{slug}/delete", name="delete", methods={"POST"})
      */
-    public function delete(Blog $post, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Blog $post, EntityManagerInterface $entityManager): Response
     {
+        if (!$this->isCsrfTokenValid('delete', $request->request->get('token'))) {
+            return $this->redirectToRoute('blog_all');
+        }
+
         $entityManager->remove($post);
         $entityManager->flush();
         $this->addFlash('success', 'post.deleted_successfully');
